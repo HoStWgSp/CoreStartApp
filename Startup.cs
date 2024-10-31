@@ -1,4 +1,6 @@
-﻿namespace CoreStartApp
+﻿using Microsoft.AspNetCore.Builder;
+
+namespace CoreStartApp
 {
     public class Startup
     {
@@ -20,10 +22,38 @@
 
             app.UseRouting();
 
-            // Добавим в конвейер запросов обработчик самым простым способом
+            //Добавляем компонент для логирования запросов с использованием метода Use.
+            app.Use(async (context, next) =>
+            {
+                // Для логирования данных о запросе используем свойства объекта HttpContext
+                Console.WriteLine($"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}");
+                await next.Invoke();
+            });
+
+            // Сначала используем метод Use, чтобы не прерывать ковейер
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapGet("/config", async context =>
+                {
+                    await context.Response.WriteAsync($"App name: {env.ApplicationName}. App running configuration: {env.EnvironmentName}");
+                });
+            });
+            app.Map("/about", About);
+
+            // Завершим вызовом метода Run
             app.Run(async (context) =>
             {
                 await context.Response.WriteAsync($"Welcome to the {env.ApplicationName}!");
+            });
+        }
+        /// <summary>
+        ///  Обработчик для страницы About
+        /// </summary>
+        private static void About(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                await context.Response.WriteAsync($"{env.ApplicationName} - ASP.Net Core tutorial project");
             });
         }
     }
