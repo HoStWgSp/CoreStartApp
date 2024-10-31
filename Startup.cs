@@ -30,30 +30,30 @@ namespace CoreStartApp
                 await next.Invoke();
             });
 
+
             // Сначала используем метод Use, чтобы не прерывать ковейер
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGet("/", async context =>
+                {
+                    await context.Response.WriteAsync($"Welcome to the {env.ApplicationName}!");
+                });
+
                 endpoints.MapGet("/config", async context =>
                 {
                     await context.Response.WriteAsync($"App name: {env.ApplicationName}. App running configuration: {env.EnvironmentName}");
                 });
+                endpoints.MapGet("/about", async context =>
+                {
+                    await context.Response.WriteAsync($"{env.ApplicationName} - ASP.Net Core tutorial project");
+                });
             });
-            app.Map("/about", About);
 
-            // Завершим вызовом метода Run
+
+            // Обработчик для ошибки "страница не найдена"
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync($"Welcome to the {env.ApplicationName}!");
-            });
-        }
-        /// <summary>
-        ///  Обработчик для страницы About
-        /// </summary>
-        private static void About(IApplicationBuilder app)
-        {
-            app.Run(async context =>
-            {
-                await context.Response.WriteAsync($"{env.ApplicationName} - ASP.Net Core tutorial project");
+                await context.Response.WriteAsync($"Page not found");
             });
         }
     }
