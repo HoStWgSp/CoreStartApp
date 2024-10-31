@@ -23,8 +23,9 @@ namespace CoreStartApp
 
             app.UseRouting();
 
-            // Подключаем логирвоание с использованием ПО промежуточного слоя
-            app.UseMiddleware<LoggingMiddleware>();
+
+            // Поддержка статических файлов
+            app.UseStaticFiles();
 
 
             // Сначала используем метод Use, чтобы не прерывать ковейер
@@ -51,6 +52,12 @@ namespace CoreStartApp
             {
                 await context.Response.WriteAsync($"Page not found");
             });
+
+            // Подключаем логирвоание с использованием ПО промежуточного слоя
+            app.UseMiddleware<LoggingMiddleware>();
+            
+
+            Console.WriteLine($"Launching project from: {env.ContentRootPath}");
         }
     }
 }
