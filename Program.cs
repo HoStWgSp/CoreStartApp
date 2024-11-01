@@ -1,10 +1,9 @@
-namespace MVCStartApp
+namespace MVCStartUpp
 {
     public class Program
     {
         public static void Main(string[] args)
         {
-            
             CreateHostBuilder(args).Build().Run();
         }
         /// <summary>
@@ -16,8 +15,6 @@ namespace MVCStartApp
                .ConfigureWebHostDefaults(webBuilder =>
                {
                    webBuilder.UseStartup<Startup>();
-                   // Переопределяем путь до статических файлов по умолчанию
-                   webBuilder.UseWebRoot("Views");
                });
     }
 }

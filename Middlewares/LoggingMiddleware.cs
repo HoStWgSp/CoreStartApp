@@ -1,4 +1,4 @@
-﻿namespace MVCStartApp.Middlewares
+﻿namespace MVCStartUpp.Middlewares
 {
     public class LoggingMiddleware
     {
@@ -17,12 +17,14 @@
         /// </summary>
         public async Task InvokeAsync(HttpContext context)
         {
-            // Для логирования данных о запросе используем свойста объекта HttpContext
-            Console.WriteLine($"[{DateTime.Now}]: New request to http://{context.Request.Host.Value + context.Request.Path}");
+            LogConsole(context);
+            await LogFile(context);
 
             // Передача запроса далее по конвейеру
             await _next.Invoke(context);
+
         }
+
         private void LogConsole(HttpContext context)
         {
             // Для логирования данных о запросе используем свойста объекта HttpContext

@@ -1,33 +1,54 @@
-﻿
-using Microsoft.EntityFrameworkCore;
-using MVCStartApp.DB;
-using MVCStartApp.Middlewares;
-using MVCStartApp.Repos;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using MVCStartUpp.Blog;
+using MVCStartUpp.Middlewares;
 
-namespace MVCStartApp
+namespace MVCStartUpp
 {
     public class Startup
     {
+        static IWebHostEnvironment _env;
+        public IConfiguration Configuration { get; }
+
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<BlogContext>(options => options.UseSqlServer(connection));
-            services.AddControllersWithViews();// регистрация сервиса репозитория для взаимодействия с базой данных
+            services.AddControllersWithViews();
+            // регистрация сервиса репозитория для взаимодействия с базой данных
             services.AddScoped<IBlogRepository, BlogRepository>();
         }
-        // Метод вызывается средой ASP.NET.
-        // Используйте его для настройки конвейера запросов
+
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            // Подключаем логирвоание с использованием ПО промежуточного слоя
+            _env = env;
 
             if (env.IsDevelopment() || env.IsStaging())
             {
                 app.UseDeveloperExceptionPage();
             }
+            //app.UseHttpsRedirection();
+
             app.UseRouting();
+            Console.WriteLine($"Launching project from: {env.ContentRootPath}");
+            
+            // Поддержка статических файлов
+            app.UseStaticFiles();
+
+            app.UseMiddleware<LoggingMiddleware>();
+
+            // обрабатываем ошибки HTTP
+            app.UseStatusCodePages();
 
             app.UseAuthorization();
+
+            app.Map("/config", Config);
+            app.Map("/about", About);
 
             app.UseEndpoints(endpoints =>
             {
@@ -35,8 +56,30 @@ namespace MVCStartApp
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
+        }
 
-            app.UseMiddleware<LoggingMiddleware>();
+
+
+        /// <summary>
+        ///  Обработчик для страницы About
+        /// </summary>
+        private static void About(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                await context.Response.WriteAsync($"{_env.ApplicationName} - ASP.Net Core tutorial project");
+            });
+        }
+
+        /// <summary>
+        ///  Обработчик для главной страницы
+        /// </summary>
+        private static void Config(IApplicationBuilder app)
+        {
+            app.Run(async context =>
+            {
+                await context.Response.WriteAsync($"App name: {_env.ApplicationName}. App running configuration: {_env.EnvironmentName}");
+            });
         }
     }
 }

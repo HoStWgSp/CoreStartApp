@@ -1,4 +1,4 @@
-﻿namespace MVCStartApp.Models.Db
+﻿namespace MVCStartUpp.Models.Db
 {
     public class UserPost
     {
